@@ -1,0 +1,158 @@
+sudo apt-get install uuid uuid-dev \
+zlib1g-dev liblz-dev \
+liblzo2-2 liblzo2-dev \
+lzop \
+git curl \
+u-boot-tools \
+mtd-utils \
+android-sdk-libsparse-utils \
+device-tree-compiler \
+gdisk \
+m4 \
+bison \
+flex make \
+libssl-dev \
+gcc-multilib \
+libgnutls28-dev \
+swig \liblz4-tool \
+libdw-dev \
+dwarves \
+bc cpio tar lz4 rsync \
+ninja-build clang \
+libelf-dev \
+build-essential \
+libncurses5
+================================
+Configure Git before use. Set the name and email as follows:
+• git config --global user.name "First Last"
+• git config --global user.email "first.last@company.com"
+=====================================
+$ cd ~ (or any other directory you like)
+$ tar xzvf imx-android-13.0.0_2.2.0.tar.gz
+===============================================
+mkdir ~/bin
+curl https://storage.googleapis.com/git-repo-downloads/repo > ~/bin/repo
+chmod a+x ~/bin/repo
+export PATH=${PATH}:~/bin
+
+copy->imx-android-13.0.0_2.2.0.tar.gz->in above folder and extract.(download package from :)
+source ./imx-android-13.0.0_2.2.0/imx_android_setup.sh
+By default, after preceding command finishes execution, current working directory changed to the i.MX Android source code root directory.
+# ${MY_ANDROID} will be refered as the i.MX Android source code root directory
+in all i.MX Andorid release documentation.
+$ export MY_ANDROID=`pwd`
+====================================================
+https://developer.arm.com/downloads/-/gnu-a
+	AArch64 GNU/Linux target (aarch64-none-linux-gnu)
+
+    	gcc-arm-9.2-2019.12-x86_64-aarch64-none-linux-gnu.tar.xz
+===============================================
+# if "gcc-arm-9.2-2019.12-x86_64-aarch64-none-linux-gnu.tar.xz" is used
+$ sudo tar -xvJf gcc-arm-9.2-2019.12-x86_64-aarch64-none-linux-gnu.tar.xz-C /opt
+$ export AARCH64_GCC_CROSS_COMPILE=/opt/gcc-arm-9.2-2019.12-x86_64-aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu-
+======================================
+sudo git clone https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86 /opt/prebuilt-android-clang
+cd /opt/prebuilt-android-clang
+sudo git checkout d20e409261d6ad80a0c29ac2055bf5c3bb996ef4
+export CLANG_PATH=/opt/prebuilt-android-clang
+sudo git clone https://android.googlesource.com/kernel/prebuilts/build-tools /opt/prebuilt-android-kernel-build-tools
+cd /opt/prebuilt-android-kernel-build-tools
+sudo git checkout e3f6a8c059b94f30f7184a7d335876f8a13a2366
+export PATH=/opt/prebuilt-android-kernel-build-tools/linux-x86/bin:$PATH
+
+========================================
+2. Change to the top-level build directory.
+$ cd ${MY_ANDROID}
+3. Set up the environment for building. This only configures the current terminal.
+$ source build/envsetup.sh
+4. Execute the Android lunch command. In this example, the setup is for the production image of i.MX 8M
+Mini EVK Board/Platform device with userdebug type.
+$ lunch evk_8mm-userdebug
+5. Execute the imx-make.sh script to generate the image.
+$ ./imx-make.sh -j4 2>&1 | tee build-log.txt
+=============================================
+if below error comes
+make: Entering directory '/home/user/Acclivis/Radio_Activity/Android_13/android_build'
+/home/user/Acclivis/Radio_Activity/Android_13/android_build/device/nxp/common/build/kernel.mk:61: *** shell env CLANG_PATH is not set. Please follow user guide doc to set correct CLANG_PATH.  Stop.
+make: Leaving directory '/home/user/Acclivis/Radio_Activity/Android_13/android_build'
+
+
+then go to the path where build is there(user@acclivis:~/Acclivis/Radio_Activity/Android_13/android_build) and all exports again
+
+export AARCH64_GCC_CROSS_COMPILE=/opt/gcc-arm-9.2-2019.12-x86_64-aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu-
+export CLANG_PATH=/opt/prebuilt-android-clang
+export PATH=/opt/prebuilt-android-kernel-build-tools/linux-x86/bin:$PATH
+
+source build/envsetup.sh
+lunch evk_8mp-userdebug
+./imx-make.sh -j4 2>&1 | tee build-log.txt
+
+
+
+out/target/product/evk_8mm/obj_arm/SHARED_LIBRARIES/rdCore_intermediates/rdCore.so.toc
+
+================================================================================
+#build commands:
+
+mmm hardware/interfaces/broadcastradio/
+
+m android.hardware.broadcastradio-update-api
+
+===================================
+To copy image to SD card:
+
+sudo ./device/nxp/common/tools/imx-sdcard-partition.sh -f imx8mp -D out/target/product/evk_8mp/ /dev/sda
+
+================================
+To check service is listed or not
+1.adb devices
+
+2.adb shell service list
+=================================
+open another terminal: 
+adb shell
+su
+getenforce     //Enforcing
+setenforce 0   //Permissive
+=======================================
+To take the logs:
+open another terminal: 
+adb logcat> test.txt
+======================================
+
+source build/envsetup.sh
+
+lunch 69
+
+adb push /home/user/Vivek/android_build/out/target/product/evk_8mp/system/priv-app/Radio_Properties_Aosp/Radio_Properties_Aosp.apk /data/local/tmp/Radio_Properties_Aosp.apk
+
+adb shell pm install /data/local/tmp/Radio_Properties_Aosp.apk
+
+===============================================================
+
+FM Tuner driver changes:
+
+Permissions:Add permissions for the FM tuner device in the ueventd.rc file:
+
+/home/user/Vivek/android_build/device/nxp/imx8m/evk_8mp/ueventd.nxp.rc
+add this in the above file:
+/dev/tea5767 0660 radio radio
+
+
+/home/user/Vivek/android_build/vendor/nxp-opensource/imx-mkimage/scripts/pad_image.sh
+make ARCH=arm64 CROSS_COMPILE=aarch64-none-linux-gnu- menuconfig
+
+
+The commands below can achieve the same result:
+#
+$
+#
+$
+Build U-Boot/kernel with imx-make.sh first, but not to build Android images.
+./imx-make.sh bootloader kernel -j4 2>&1 | tee build-log.txt
+
+
+
+/sys/firmware/devicetree/base/soc@0/bus@30800000/i2c@30a40000/tea5767@60
+
+
